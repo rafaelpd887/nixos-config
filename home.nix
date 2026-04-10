@@ -1,17 +1,32 @@
 { config, pkgs, ... }:
 
+let
+  wallpaperScript = pkgs.writeShellScriptBin "wallpicker" ''
+    WALLDIR="$HOME/Pictures/wallpapers"
+
+    SELECTED=$(ls "$WALLDIR" | ${pkgs.rofi}/bin/rofi -dmenu -p "Wallpaper")
+
+    [ -z "$SELECTED" ] && exit 0
+
+    FULL="$WALLDIR/$SELECTED"
+
+    ${pkgs.hyprpaper}/bin/hyprctl hyprpaper unload all
+    ${pkgs.hyprpaper}/bin/hyprctl hyprpaper preload "$FULL"
+    ${pkgs.hyprpaper}/bin/hyprctl hyprpaper wallpaper ",$FULL"
+  '';
+
+in
 {
   home.username = "rafael";
   home.homeDirectory = "/home/rafael";
-
   home.stateVersion = "25.11";
 
   # =========================
-  # 📦 PACKAGES (LEVE)
+  # 📦 PACKAGES
   # =========================
   home.packages = with pkgs; [
 
-    # UI core
+    # UI
     waybar
     rofi
     thunar
@@ -34,14 +49,20 @@
     ffmpeg
     mpv
 
-    # wayland essentials
+    # wayland
     wl-clipboard
     grim
     slurp
     hyprpaper
 
-    # fonte
+    # wallpaper script
+    wallpaperScript
+
+    # fonts + icons
     nerd-fonts.jetbrains-mono
+    papirus-icon-theme
+    catppuccin-gtk
+    catppuccin-cursors.mochaDark
   ];
 
   # =========================
@@ -54,22 +75,20 @@
 
       "$mod" = "SUPER";
 
-      # =========================
-      # ⌨️ KEYBINDS
-      # =========================
       bind = [
 
-        # apps
         "$mod, RETURN, exec, kitty"
         "$mod, Q, killactive"
         "$mod, D, exec, rofi -show drun"
-        "$mod, TAB, exec, rofi -show window"   # 🔥 ALT+TAB LEVE VISUAL
+        "$mod, TAB, exec, rofi -show window"
         "$mod, E, exec, thunar"
 
-        # ALT + TAB nativo
+        # 🖼️ wallpaper
+        "$mod, W, exec, wallpicker"
+
+        # ALT TAB
         "ALT, TAB, cyclenext"
         "ALT SHIFT, TAB, cyclerprev"
-        "ALT, TAB, bringactivetotop"
 
         # workspaces
         "$mod, 1, workspace, 1"
@@ -78,53 +97,19 @@
         "$mod, 4, workspace, 4"
         "$mod, 5, workspace, 5"
 
-        # mover janela
         "$mod SHIFT, 1, movetoworkspace, 1"
         "$mod SHIFT, 2, movetoworkspace, 2"
 
-        # screenshot file
+        # screenshots
         ", Print, exec, grim -g \"$(slurp)\" ~/Pictures/screenshot.png"
-
-        # screenshot clipboard
         "$mod, Print, exec, grim -g \"$(slurp)\" - | wl-copy"
-
-        # volume
-        ", XF86AudioRaiseVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ +5%"
-        ", XF86AudioLowerVolume, exec, pactl set-sink-volume @DEFAULT_SINK@ -5%"
-        ", XF86AudioMute, exec, pactl set-sink-mute @DEFAULT_SINK@ toggle"
-
-        # brilho
-        ", XF86MonBrightnessUp, exec, brightnessctl set +10%"
-        ", XF86MonBrightnessDown, exec, brightnessctl set 10%-"
       ];
 
-      # =========================
-      # 🖱️ MOUSE
-      # =========================
       bindm = [
         "$mod, mouse:272, movewindow"
         "$mod, mouse:273, resizewindow"
       ];
 
-      # =========================
-      # 🎞️ ANIMAÇÕES LEVES
-      # =========================
-      animations = {
-        enabled = true;
-
-        bezier = "smooth, 0.05, 0.9, 0.1, 1.05";
-
-        animation = [
-          "windows, 1, 6, smooth"
-          "windowsOut, 1, 6, default, popin 80%"
-          "fade, 1, 5, default"
-          "workspaces, 1, 5, default"
-        ];
-      };
-
-      # =========================
-      # 🧱 LAYOUT
-      # =========================
       general = {
         gaps_in = 6;
         gaps_out = 12;
@@ -132,14 +117,18 @@
         layout = "dwindle";
       };
 
-      dwindle = {
-        pseudotile = true;
-        preserve_split = true;
+      animations = {
+        enabled = true;
+
+        bezier = "smooth, 0.05, 0.9, 0.1, 1.05";
+
+        animation = [
+          "windows, 1, 6, smooth"
+          "fade, 1, 5, default"
+          "workspaces, 1, 5, default"
+        ];
       };
 
-      # =========================
-      # 🖼️ STARTUP
-      # =========================
       exec-once = [
         "hyprpaper"
         "waybar"
@@ -149,25 +138,84 @@
   };
 
   # =========================
-  # 📊 WAYBAR
+  # 📊 WAYBAR (Catppuccin Mocha)
   # =========================
-  programs.waybar.enable = true;
+  programs.waybar = {
+    enable = true;
+
+    style = ''
+      * {
+        font-family: JetBrainsMono Nerd Font;
+        font-size: 13px;
+      }
+
+      window#waybar {
+        background: #1e1e2e;
+        color: #cdd6f4;
+      }
+
+      #workspaces button {
+        padding: 0 6px;
+        color: #6c7086;
+      }
+
+      #workspaces button.active {
+        color: #cba6f7;
+      }
+
+      #clock { color: #89b4fa; }
+      #cpu { color: #f38ba8; }
+      #memory { color: #a6e3a1; }
+      #network { color: #89dceb; }
+      #pulseaudio { color: #f9e2af; }
+      #battery { color: #fab387; }
+    '';
+  };
 
   # =========================
-  # 🔔 NOTIFICAÇÕES
-  # =========================
-  services.swaync.enable = true;
-
-  # =========================
-  # 🎨 GTK
+  # 🎨 GTK (CATPPUCCIN)
   # =========================
   gtk = {
     enable = true;
 
     theme = {
-      name = "adw-gtk3-dark";
-      package = pkgs.adw-gtk3;
+      name = "Catppuccin-Mocha-Standard-Blue-dark";
+      package = pkgs.catppuccin-gtk;
     };
+
+    cursorTheme = {
+      name = "Catppuccin-Mocha-Dark-Cursors";
+      package = pkgs.catppuccin-cursors.mochaDark;
+    };
+
+    iconTheme = {
+      name = "Papirus-Dark";
+      package = pkgs.papirus-icon-theme;
+    };
+  };
+
+  # =========================
+  # 🧠 ROFI THEME (leve + clean)
+  # =========================
+  programs.rofi = {
+    enable = true;
+
+    theme = ''  
+      * {
+        background: #1e1e2e;
+        foreground: #cdd6f4;
+        selected: #89b4fa;
+      }
+
+      window {
+        background-color: @background;
+      }
+
+      element selected {
+        background-color: @selected;
+        text-color: #1e1e2e;
+      }
+    '';
   };
 
   # =========================
@@ -175,18 +223,8 @@
   # =========================
   programs.zsh = {
     enable = true;
-
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
-
-    shellAliases = {
-      ll = "ls -l";
-      gs = "git status";
-    };
-
-    initContent = ''
-      PROMPT='%F{blue}%~ %f$(git_prompt_info) %# '
-    '';
   };
 
   programs.home-manager.enable = true;
