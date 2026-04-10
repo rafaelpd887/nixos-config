@@ -25,36 +25,13 @@
   };
 
   # =========================
-  # 📦 PACKAGES
+  # 📦 SYSTEM (MINIMAL)
   # =========================
   environment.systemPackages = with pkgs; [
-    git neovim fzf direnv wget btop fastfetch
-
-    # Python + DS
-    python3Full
-    python3Packages.pandas
-    python3Packages.seaborn
-    python3Packages.matplotlib
-    python3Packages.scikit-learn
-    python3Packages.xgboost
-    python3Packages.lightgbm
-    python3Packages.spyder
-
-    # R
-    rWrapper
-    rstudio
-
-    # Apps
-    firefox obsidian
-
-    # Terminal
-    kitty
-
-    # Media
-    ffmpeg mpv
-
-    # Gaming
-    steam-run
+    git
+    neovim
+    wget
+    fastfetch
   ];
 
   # =========================
@@ -79,16 +56,21 @@
   };
 
   # =========================
-  # 🔊 AUDIO
+  # 🔊 AUDIO + BLUETOOTH
   # =========================
   services.pulseaudio.enable = false;
+
   security.rtkit.enable = true;
 
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
+    bluetooth.enable = true;
   };
+
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
 
   # =========================
   # 🌐 NETWORK
@@ -125,6 +107,7 @@
   # 🧠 NIX
   # =========================
   nixpkgs.config.allowUnfree = true;
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   nix.gc = {

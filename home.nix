@@ -3,12 +3,14 @@
 {
   home.username = "rafael";
   home.homeDirectory = "/home/rafael";
+
   home.stateVersion = "25.11";
 
   # =========================
-  # 📦 PACKAGES
+  # 📦 USER PACKAGES
   # =========================
   home.packages = with pkgs; [
+
     # UI
     waybar
     rofi
@@ -18,8 +20,34 @@
     # utils
     pavucontrol
     playerctl
+    btop
+    fzf
+    direnv
 
-    # fonte bonita (ícones)
+    # apps
+    firefox
+    obsidian
+    kitty
+
+    # media
+    ffmpeg
+    mpv
+
+    # Python (CORRETO)
+    (python3.withPackages (ps: with ps; [
+      pandas
+      seaborn
+      matplotlib
+      scikit-learn
+      xgboost
+      lightgbm
+    ]))
+
+    # R
+    rWrapper
+    rstudio
+
+    # fonte
     nerd-fonts.jetbrains-mono
   ];
 
@@ -42,7 +70,7 @@
   };
 
   # =========================
-  # 📊 WAYBAR (MINIMALISTA)
+  # 📊 WAYBAR
   # =========================
   programs.waybar = {
     enable = true;
@@ -57,15 +85,11 @@
         modules-right = [ "cpu" "memory" "network" "pulseaudio" "battery" ];
 
         clock.format = "{:%H:%M}";
-
         cpu.format = " {usage}%";
         memory.format = " {used:0.1f}G";
-
         network.format-wifi = "";
         network.format-disconnected = "";
-
         pulseaudio.format = " {volume}%";
-
         battery.format = " {capacity}%";
       };
     }];
@@ -81,29 +105,12 @@
         color: #cdd6f4;
       }
 
-      #clock {
-        color: #89b4fa;
-      }
-
-      #cpu {
-        color: #f38ba8;
-      }
-
-      #memory {
-        color: #a6e3a1;
-      }
-
-      #network {
-        color: #89dceb;
-      }
-
-      #pulseaudio {
-        color: #f9e2af;
-      }
-
-      #battery {
-        color: #fab387;
-      }
+      #clock { color: #89b4fa; }
+      #cpu { color: #f38ba8; }
+      #memory { color: #a6e3a1; }
+      #network { color: #89dceb; }
+      #pulseaudio { color: #f9e2af; }
+      #battery { color: #fab387; }
     '';
   };
 
@@ -113,7 +120,7 @@
   services.swaync.enable = true;
 
   # =========================
-  # 🎨 GTK (clean dark)
+  # 🎨 GTK
   # =========================
   gtk = {
     enable = true;
@@ -125,7 +132,7 @@
   };
 
   # =========================
-  # ⚡ ZSH TUNADO
+  # ⚡ ZSH
   # =========================
   programs.zsh = {
     enable = true;
