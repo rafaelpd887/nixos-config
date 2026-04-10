@@ -11,7 +11,7 @@
   # =========================
   users.users.rafael = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "docker" ];
     shell = pkgs.zsh;
   };
 
@@ -25,7 +25,7 @@
   };
 
   # =========================
-  # 📦 SYSTEM (MINIMAL)
+  # 📦 SYSTEM 
   # =========================
   environment.systemPackages = with pkgs; [
     git
@@ -33,6 +33,14 @@
     wget
     fastfetch
   ];
+
+  # =========================
+  # 🐳 DOCKER 
+  # =========================
+  virtualisation.docker = {
+    enable = true;
+    autoStart = false; # não inicia no boot (zero consumo idle)
+  };
 
   # =========================
   # 🎮 GAMING
