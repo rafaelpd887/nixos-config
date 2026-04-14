@@ -38,7 +38,7 @@
   # =========================
   virtualisation.docker = {
     enable = true;
-    enableOnBoot = false;   # inicia só quando necessário (recomendado)
+    enableOnBoot = false;   
   };
 
   # =========================
