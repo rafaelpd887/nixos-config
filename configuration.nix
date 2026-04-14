@@ -34,11 +34,11 @@
   ];
 
   # =========================
-  # 🐳 DOCKER
+  # 🐳 DOCKER (corrigido)
   # =========================
   virtualisation.docker = {
     enable = true;
-    autoStart = false;
+    enableOnBoot = false;   # inicia só quando necessário (recomendado)
   };
 
   # =========================
@@ -48,14 +48,12 @@
   programs.gamemode.enable = true;
 
   # =========================
-  # 🪟 HYPRLAND + AUTOLOGIN DIRETO (sem greetd)
+  # 🪟 HYPRLAND + AUTOLOGIN DIRETO
   # =========================
   programs.hyprland.enable = true;
 
-  # Autologin direto no TTY1
   services.getty.autologinUser = "rafael";
 
-  # Inicia Hyprland automaticamente com configurações recomendadas para NVIDIA
   environment.loginShellInit = ''
     if [[ "$(tty)" == "/dev/tty1" ]]; then
       exec env \
@@ -117,8 +115,6 @@
     layout = "br";
     xkbVariant = "abnt2";
   };
-
-  # Também aplica no console (TTY)
   console.useXkbConfig = true;
 
   # =========================
@@ -133,16 +129,17 @@
   };
 
   # =========================
-  # 🌍 LOCALE
+  # 🌍 LOCALE (inglês + algumas coisas em PT-BR)
   # =========================
   time.timeZone = "America/Sao_Paulo";
+
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # Opcional: algumas coisas em português
   i18n.extraLocaleSettings = {
-    LC_TIME = "pt_BR.UTF-8";
-    LC_MONETARY = "pt_BR.UTF-8";
+    LC_TIME        = "pt_BR.UTF-8";
+    LC_MONETARY    = "pt_BR.UTF-8";
     LC_MEASUREMENT = "pt_BR.UTF-8";
+    LC_PAPER       = "pt_BR.UTF-8";
   };
 
   system.stateVersion = "25.11";
