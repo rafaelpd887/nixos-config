@@ -1,5 +1,4 @@
 { config, pkgs, ... }:
-
 {
   imports = [
     ./hardware-configuration.nix
@@ -25,7 +24,7 @@
   };
 
   # =========================
-  # 📦 SYSTEM 
+  # 📦 SYSTEM
   # =========================
   environment.systemPackages = with pkgs; [
     git
@@ -35,11 +34,11 @@
   ];
 
   # =========================
-  # 🐳 DOCKER 
+  # 🐳 DOCKER
   # =========================
   virtualisation.docker = {
     enable = true;
-    autoStart = false; # não inicia no boot (zero consumo idle)
+    autoStart = false;
   };
 
   # =========================
@@ -49,34 +48,36 @@
   programs.gamemode.enable = true;
 
   # =========================
-  # 🪟 HYPRLAND + AUTOLOGIN
+  # 🪟 HYPRLAND + AUTOLOGIN DIRETO (sem greetd)
   # =========================
   programs.hyprland.enable = true;
 
-  services.greetd = {
-    enable = true;
-    settings = {
-      initial_session = {
-        command = "Hyprland";
-        user = "rafael";
-      };
-    };
-  };
+  # Autologin direto no TTY1
+  services.getty.autologinUser = "rafael";
+
+  # Inicia Hyprland automaticamente com configurações recomendadas para NVIDIA
+  environment.loginShellInit = ''
+    if [[ "$(tty)" == "/dev/tty1" ]]; then
+      exec env \
+        WLR_NO_HARDWARE_CURSORS=1 \
+        GBM_BACKEND=nvidia-drm \
+        __GLX_VENDOR_LIBRARY_NAME=nvidia \
+        LIBVA_DRIVER_NAME=nvidia \
+        start-hyprland
+    fi
+  '';
 
   # =========================
   # 🔊 AUDIO + BLUETOOTH
   # =========================
   services.pulseaudio.enable = false;
-
   security.rtkit.enable = true;
-
   services.pipewire = {
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
     bluetooth.enable = true;
   };
-
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
@@ -94,7 +95,6 @@
   # 🖥️ NVIDIA
   # =========================
   hardware.graphics.enable = true;
-
   services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {
@@ -102,7 +102,6 @@
     open = false;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-
     prime = {
       offload.enable = true;
       offload.enableOffloadCmd = true;
@@ -112,12 +111,21 @@
   };
 
   # =========================
+  # ⌨️ TECLADO ABNT2
+  # =========================
+  services.xserver = {
+    layout = "br";
+    xkbVariant = "abnt2";
+  };
+
+  # Também aplica no console (TTY)
+  console.useXkbConfig = true;
+
+  # =========================
   # 🧠 NIX
   # =========================
   nixpkgs.config.allowUnfree = true;
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
   nix.gc = {
     automatic = true;
     dates = "weekly";
@@ -129,6 +137,13 @@
   # =========================
   time.timeZone = "America/Sao_Paulo";
   i18n.defaultLocale = "en_US.UTF-8";
+
+  # Opcional: algumas coisas em português
+  i18n.extraLocaleSettings = {
+    LC_TIME = "pt_BR.UTF-8";
+    LC_MONETARY = "pt_BR.UTF-8";
+    LC_MEASUREMENT = "pt_BR.UTF-8";
+  };
 
   system.stateVersion = "25.11";
 }
